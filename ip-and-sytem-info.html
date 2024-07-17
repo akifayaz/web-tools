@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IP and Sytem Info</title>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+    body {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 800;
+    }
+</style>
+<script>
+  // Your JavaScript code here
+  var navigator = {};
+
+  navigator.browserInfo = function() {
+    var ua= navigator.userAgent, tem,
+    M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+    if(/trident/i.test(M[1])){
+        tem=  /\brv[ :]+(\d+)/g.exec(ua) || [];
+        return 'IE '+(tem[1] || '');
+    }
+    if(M[1]=== 'Chrome'){
+        tem= ua.match(/\b(OPR|Edge)\/(\d+)/);
+        if(tem!= null) return tem.slice(1).join(' ').replace('OPR', 'Opera');
+    }
+    M= M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+    if((tem= ua.match(/version\/(\d+)/i))!= null) M.splice(1, 1, tem[1]);
+    return { 'browser': M[0], 'version': M[1] };
+  };
+
+  navigator.systemInfo = function () {
+    var unknown = '-';
+    var windowSize = window.innerWidth + " x " + window.innerHeight;
+
+    var browser = navigator.browserInfo();
+
+    var os = unknown;
+    var clientStrings = [
+        {s:'Windows 10', r:/(Windows 10.0|Windows NT 10.0)/},
+        {s:'Windows 8.1', r:/(Windows 8.1|Windows NT 6.3)/},
+        {s:'Windows 8', r:/(Windows 8|Windows NT 6.2)/},
+        {s:'Windows 7', r:/(Windows 7|Windows NT 6.1)/},
+        {s:'Windows Vista', r:/Windows NT 6.0/},
+        {s:'Windows Server 2003', r:/Windows NT 5.2/},
+        {s:'Windows XP', r:/(Windows NT 5.1|Windows XP)/},
+        {s:'Windows 2000', r:/(Windows NT 5.0|Windows 2000)/},
+        {s:'Windows ME', r:/(Win 9x 4.90|Windows ME)/},
+        {s:'Windows 98', r:/(Windows 98|Win98)/},
+        {s:'Windows 95', r:/(Windows 95|Win95|Windows_95)/},
+        {s:'Windows NT 4.0', r:/(Windows NT 4.0|WinNT4.0|WinNT|Windows NT)/},
+        {s:'Windows CE', r:/Windows CE/},
+        {s:'Windows 3.11', r:/Win16/},
+        {s:'Android', r:/Android/},
+        {s:'Open BSD', r:/OpenBSD/},
+        {s:'Sun OS', r:/SunOS/},
+        {s:'Linux', r:/(Linux|X11)/},
+        {s:'iOS', r:/(iPhone|iPad|iPod)/},
+        {s:'Mac OS X', r:/Mac OS X/},
+        {s:'Mac OS', r:/(MacPPC|MacIntel|Mac_PowerPC|Macintosh)/},
+        {s:'QNX', r:/QNX/},
+        {s:'UNIX', r:/UNIX/},
+        {s:'BeOS', r:/BeOS/},
+        {s:'OS/2', r:/OS\/2/},
+        {s:'Search Bot', r:/(nuhk|Googlebot|Yammybot|Openbot|Slurp|MSNBot|Ask Jeeves\/Teoma|ia_archiver)/}
+    ];
+    for (var id in clientStrings) {
+        var cs = clientStrings[id];
+        if (cs.r.test(navigator.userAgent)) {
+            os = cs.s;
+            break;
+        }
+    }
+    var osVersion = unknown;
+    if (/Windows/.test(os)) {
+        osVersion = /Windows (.*)/.exec(os)[1];
+        os = 'Windows';
+    }
+    switch (os) {
+        case 'Mac OS X':
+            osVersion = /Mac OS X (10[\.\_\d]+)/.exec(navigator.userAgent)[1];
+            break;
+        case 'Android':
+            osVersion = /Android ([\.\_\d]+)/.exec(navigator.userAgent)[1];
+            break;
+        case 'iOS':
+            osVersion = /OS (\d+)_(\d+)_?(\d+)?/.exec(navigator.appVersion);
+            osVersion = osVersion[1] + '.' + osVersion[2] + '.' + (osVersion[3] | 0);
+            break;
+    }
+
+    return {
+        os: os,
+        os_version: osVersion,
+        browser: browser.browser,
+        browser_version: browser.version,
+        window: windowSize
+    };
+  };
+
+  // You can add Angular or other framework integrations here if needed
+
+</script>
+</head>
+<body>
+
+
+
+
+    <h1>IP Adresim Ne?</h1>
+    <div id="ip-info">
+      Yükleniyor...
+    </div>
+    
+    <script>
+      function func() {
+        var elem = document.getElementById('ip-info');
+        let apiKey = 'd9d54e20c86ff78846d49e6944626b6027757b30261a400611608854';
+        json(`https://api.ipdata.co?api-key=${apiKey}`).then(data => {
+          elem.innerHTML = `
+            <p><b>IP Adresi:</b> ${data.ip}</p>
+            <p><b>Şehir:</b> ${data.city}</p>
+            <p><b>Bölge:</b> ${data.region}</p>
+            <p><b>Ülke:</b> ${data.country_name}</p>
+            <p><b>Ulusal Ülke Kodu:</b> ${data.country_code}</p>
+            <p><b>Kıta:</b> ${data.continent_name}</p>
+            <p><b>Enlem:</b> ${data.latitude}</p>
+            <p><b>Boylam:</b> ${data.longitude}</p>
+            <p><b>ISP:</b> ${data.asn.name}</p>
+            <p><b>Organizasyon:</b> ${data.asn.org}</p>
+          `;
+        }).catch(err => {
+          elem.innerHTML = 'IP adresinin bulunması sırasında hata oluştu.';
+          console.error(err);
+        });
+      }
+  
+      function json(url) {
+        return fetch(url).then(res => res.json());
+      }
+  
+      // Call the function to load the IP information when the page loads
+      window.onload = func;
+    </script>
+
+
+
+
+
+
+
+
+
+
+  <div ng-app="browserDetect" ng-controller="browserCtrl">
+    <h1>Sistem Bilgisi</h1>
+    <p><strong>OS:</strong> {{ systeminfo.os }} {{ systeminfo.os_version }}</p>
+    <p><strong>Browser:</strong> {{ browserinfo.browser }} {{ browserinfo.version }}</p>
+    <p><strong>Window Size:</strong> {{ systeminfo.window }}</p>
+    <!-- Add more details as needed -->
+  </div>
+
+  <!-- Include AngularJS if you're using it -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <script>
+    var app = angular.module('browserDetect', []);
+
+    app.controller('browserCtrl', function ($scope) {
+      $scope.browserinfo = navigator.browserInfo();
+      $scope.systeminfo = navigator.systemInfo();
+    });
+  </script>
+</body>
+</html>
