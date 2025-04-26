@@ -1,177 +1,305 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IP and Sytem Info</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP & Sistem Bilgisi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-    body {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 800;
-    }
-</style>
-<script>
-  // Your JavaScript code here
-  var navigator = {};
-
-  navigator.browserInfo = function() {
-    var ua= navigator.userAgent, tem,
-    M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
-    if(/trident/i.test(M[1])){
-        tem=  /\brv[ :]+(\d+)/g.exec(ua) || [];
-        return 'IE '+(tem[1] || '');
-    }
-    if(M[1]=== 'Chrome'){
-        tem= ua.match(/\b(OPR|Edge)\/(\d+)/);
-        if(tem!= null) return tem.slice(1).join(' ').replace('OPR', 'Opera');
-    }
-    M= M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
-    if((tem= ua.match(/version\/(\d+)/i))!= null) M.splice(1, 1, tem[1]);
-    return { 'browser': M[0], 'version': M[1] };
-  };
-
-  navigator.systemInfo = function () {
-    var unknown = '-';
-    var windowSize = window.innerWidth + " x " + window.innerHeight;
-
-    var browser = navigator.browserInfo();
-
-    var os = unknown;
-    var clientStrings = [
-        {s:'Windows 10', r:/(Windows 10.0|Windows NT 10.0)/},
-        {s:'Windows 8.1', r:/(Windows 8.1|Windows NT 6.3)/},
-        {s:'Windows 8', r:/(Windows 8|Windows NT 6.2)/},
-        {s:'Windows 7', r:/(Windows 7|Windows NT 6.1)/},
-        {s:'Windows Vista', r:/Windows NT 6.0/},
-        {s:'Windows Server 2003', r:/Windows NT 5.2/},
-        {s:'Windows XP', r:/(Windows NT 5.1|Windows XP)/},
-        {s:'Windows 2000', r:/(Windows NT 5.0|Windows 2000)/},
-        {s:'Windows ME', r:/(Win 9x 4.90|Windows ME)/},
-        {s:'Windows 98', r:/(Windows 98|Win98)/},
-        {s:'Windows 95', r:/(Windows 95|Win95|Windows_95)/},
-        {s:'Windows NT 4.0', r:/(Windows NT 4.0|WinNT4.0|WinNT|Windows NT)/},
-        {s:'Windows CE', r:/Windows CE/},
-        {s:'Windows 3.11', r:/Win16/},
-        {s:'Android', r:/Android/},
-        {s:'Open BSD', r:/OpenBSD/},
-        {s:'Sun OS', r:/SunOS/},
-        {s:'Linux', r:/(Linux|X11)/},
-        {s:'iOS', r:/(iPhone|iPad|iPod)/},
-        {s:'Mac OS X', r:/Mac OS X/},
-        {s:'Mac OS', r:/(MacPPC|MacIntel|Mac_PowerPC|Macintosh)/},
-        {s:'QNX', r:/QNX/},
-        {s:'UNIX', r:/UNIX/},
-        {s:'BeOS', r:/BeOS/},
-        {s:'OS/2', r:/OS\/2/},
-        {s:'Search Bot', r:/(nuhk|Googlebot|Yammybot|Openbot|Slurp|MSNBot|Ask Jeeves\/Teoma|ia_archiver)/}
-    ];
-    for (var id in clientStrings) {
-        var cs = clientStrings[id];
-        if (cs.r.test(navigator.userAgent)) {
-            os = cs.s;
-            break;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-    }
-    var osVersion = unknown;
-    if (/Windows/.test(os)) {
-        osVersion = /Windows (.*)/.exec(os)[1];
-        os = 'Windows';
-    }
-    switch (os) {
-        case 'Mac OS X':
-            osVersion = /Mac OS X (10[\.\_\d]+)/.exec(navigator.userAgent)[1];
-            break;
-        case 'Android':
-            osVersion = /Android ([\.\_\d]+)/.exec(navigator.userAgent)[1];
-            break;
-        case 'iOS':
-            osVersion = /OS (\d+)_(\d+)_?(\d+)?/.exec(navigator.appVersion);
-            osVersion = osVersion[1] + '.' + osVersion[2] + '.' + (osVersion[3] | 0);
-            break;
-    }
 
-    return {
-        os: os,
-        os_version: osVersion,
-        browser: browser.browser,
-        browser_version: browser.version,
-        window: windowSize
-    };
-  };
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f2f5;
+            color: #1a1a1a;
+            line-height: 1.6;
+            padding: 2rem;
+        }
 
-  // You can add Angular or other framework integrations here if needed
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            gap: 2rem;
+        }
 
-</script>
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        h2 {
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2 i {
+            font-size: 1.5rem;
+            color: #4299e1;
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .label {
+            font-weight: 500;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .label i {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .value {
+            color: #2d3748;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .value i {
+            font-size: 1.2rem;
+        }
+
+        .map-container {
+            margin-top: 1.5rem;
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #e2e8f0;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .info-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+
+        .Yükleniyor {
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        .error {
+            color: #e53e3e;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .map-attribution {
+            font-size: 0.8rem;
+            color: #718096;
+            margin-top: 0.5rem;
+            text-align: right;
+        }
+
+        .map-attribution a {
+            color: #4299e1;
+            text-decoration: none;
+        }
+
+        .map-attribution a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="card ip-info">
+            <h2><i class="fas fa-globe"></i> IP Bilgisi</h2>
+            <div id="ip-details" class="info-grid">
+                <div class="info-item">
+                    <span class="label"><i class="fas fa-network-wired"></i> IP Adress:</span>
+                    <span id="ip" class="value">Yükleniyor...</span>
+                </div>
+                <div class="info-item">
+                    <span class="label"><i class="fas fa-map-marker-alt"></i> Lokasyon:</span>
+                    <span id="location" class="value">Yükleniyor...</span>
+                </div>
+                <div class="info-item">
+                    <span class="label"><i class="fas fa-server"></i> ISP:</span>
+                    <span id="isp" class="value">Yükleniyor...</span>
+                </div>
+                <div class="info-item">
+                    <span class="label"><i class="fas fa-location-crosshairs"></i> Koordinatlar:</span>
+                    <span id="coordinates" class="value">Yükleniyor...</span>
+                </div>
+            </div>
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+            <div class="map-attribution">
+                Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors
+            </div>
+        </div>
 
-
-
-
-    <h1>IP Adresim Ne?</h1>
-    <div id="ip-info">
-      Yükleniyor...
+        <div class="card system-info">
+            <h2><i class="fas fa-laptop"></i>Sistem Bilgisi</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="label"><i class="fas fa-globe"></i> Tarayıcı:</span>
+                    <span id="browser" class="value">Yükleniyor...</span>
+                </div>
+                <div class="info-item">
+                    <span class="label"><i class="fas fa-desktop"></i> İşletim Sistemi:</span>
+                    <span id="os" class="value">Yükleniyor...</span>
+                </div>
+                <div class="info-item">
+                    <span class="label"><i class="fas fa-expand"></i> Ekran Çözünürlüğü:</span>
+                    <span id="resolution" class="value">Yükleniyor...</span>
+                </div>
+                <div class="info-item">
+                    <span class="label"><i class="fas fa-clock"></i> Zaman Dilimi:</span>
+                    <span id="timezone" class="value">Yükleniyor...</span>
+                </div>
+            </div>
+        </div>
     </div>
-    
+
     <script>
-      function func() {
-        var elem = document.getElementById('ip-info');
-        let apiKey = 'd9d54e20c86ff78846d49e6944626b6027757b30261a400611608854';
-        json(`https://api.ipdata.co?api-key=${apiKey}`).then(data => {
-          elem.innerHTML = `
-            <p><b>IP Adresi:</b> ${data.ip}</p>
-            <p><b>Şehir:</b> ${data.city}</p>
-            <p><b>Bölge:</b> ${data.region}</p>
-            <p><b>Ülke:</b> ${data.country_name}</p>
-            <p><b>Ulusal Ülke Kodu:</b> ${data.country_code}</p>
-            <p><b>Kıta:</b> ${data.continent_name}</p>
-            <p><b>Enlem:</b> ${data.latitude}</p>
-            <p><b>Boylam:</b> ${data.longitude}</p>
-            <p><b>ISP:</b> ${data.asn.name}</p>
-            <p><b>Organizasyon:</b> ${data.asn.org}</p>
-          `;
-        }).catch(err => {
-          elem.innerHTML = 'IP adresinin bulunması sırasında hata oluştu.';
-          console.error(err);
+        // System Information Detection
+        const getSystemInfo = () => {
+            const userAgent = navigator.userAgent;
+            const platform = navigator.platform;
+            
+            // Browser Detection with Icons
+            const getBrowserInfo = () => {
+                const ua = userAgent.toLowerCase();
+                if (ua.includes('firefox')) return { name: 'Firefox', icon: 'fab fa-firefox' };
+                if (ua.includes('chrome')) return { name: 'Chrome', icon: 'fab fa-chrome' };
+                if (ua.includes('safari')) return { name: 'Safari', icon: 'fab fa-safari' };
+                if (ua.includes('edge')) return { name: 'Edge', icon: 'fab fa-edge' };
+                if (ua.includes('opera')) return { name: 'Opera', icon: 'fab fa-opera' };
+                return { name: 'Unknown Browser', icon: 'fas fa-question-circle' };
+            };
+
+            // OS Detection with Icons
+            const getOSInfo = () => {
+                if (platform.includes('Win')) return { name: 'Windows', icon: 'fab fa-windows' };
+                if (platform.includes('Mac')) return { name: 'macOS', icon: 'fab fa-apple' };
+                if (platform.includes('Linux')) return { name: 'Linux', icon: 'fab fa-linux' };
+                if (/iPhone|iPad|iPod/.test(userAgent)) return { name: 'iOS', icon: 'fab fa-apple' };
+                if (userAgent.includes('Android')) return { name: 'Android', icon: 'fab fa-android' };
+                return { name: 'Unknown OS', icon: 'fas fa-question-circle' };
+            };
+
+            const browserInfo = getBrowserInfo();
+            const osInfo = getOSInfo();
+            const resolution = `${window.screen.width}x${window.screen.height}`;
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+            return { browserInfo, osInfo, resolution, timezone };
+        };
+
+        // Update System Info UI
+        const updateSystemInfo = () => {
+            const systemInfo = getSystemInfo();
+            
+            const browserElement = document.getElementById('browser');
+            browserElement.innerHTML = `<i class="${systemInfo.browserInfo.icon}"></i> ${systemInfo.browserInfo.name}`;
+            
+            const osElement = document.getElementById('os');
+            osElement.innerHTML = `<i class="${systemInfo.osInfo.icon}"></i> ${systemInfo.osInfo.name}`;
+            
+            document.getElementById('resolution').textContent = systemInfo.resolution;
+            document.getElementById('timezone').textContent = systemInfo.timezone;
+        };
+
+        // Initialize OpenStreetMap
+        let map = null;
+        const initMap = (lat, lng) => {
+            if (map) {
+                map.remove();
+            }
+
+            map = L.map('map').setView([lat, lng], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Add a marker
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup('Tahmini Konum')
+                .openPopup();
+        };
+
+        // Fetch IP Information
+        const fetchIPInfo = async () => {
+            try {
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+
+                document.getElementById('ip').textContent = data.ip;
+                document.getElementById('location').textContent = `${data.city}, ${data.country_name}`;
+                document.getElementById('isp').textContent = data.org;
+                document.getElementById('coordinates').textContent = `${data.latitude}, ${data.longitude}`;
+
+                // Initialize map with location
+                initMap(data.latitude, data.longitude);
+            } catch (error) {
+                console.error('Error fetching IP info:', error);
+                document.querySelectorAll('.value').forEach(el => {
+                    el.textContent = 'Error Yükleniyor data';
+                    el.classList.add('error');
+                });
+            }
+        };
+
+        // Initialize everything when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            updateSystemInfo();
+            fetchIPInfo();
         });
-      }
-  
-      function json(url) {
-        return fetch(url).then(res => res.json());
-      }
-  
-      // Call the function to load the IP information when the page loads
-      window.onload = func;
     </script>
-
-
-
-
-
-
-
-
-
-
-  <div ng-app="browserDetect" ng-controller="browserCtrl">
-    <h1>Sistem Bilgisi</h1>
-    <p><strong>OS:</strong> {{ systeminfo.os }} {{ systeminfo.os_version }}</p>
-    <p><strong>Browser:</strong> {{ browserinfo.browser }} {{ browserinfo.version }}</p>
-
-    <!-- Add more details as needed -->
-  </div>
-
-  <!-- Include AngularJS if you're using it -->
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
-  <script>
-    var app = angular.module('browserDetect', []);
-
-    app.controller('browserCtrl', function ($scope) {
-      $scope.browserinfo = navigator.browserInfo();
-      $scope.systeminfo = navigator.systemInfo();
-    });
-  </script>
 </body>
-</html>
+</html> 
