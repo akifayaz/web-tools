@@ -149,6 +149,10 @@
         .map-attribution a:hover {
             text-decoration: underline;
         }
+
+        window.onload = function() {
+  window.parent.postMessage({ height: document.body.scrollHeight }, "*");
+};
     </style>
 </head>
 <body>
