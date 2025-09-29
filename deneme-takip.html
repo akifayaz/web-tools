@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deneme Net Takip Sistemi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(to bottom right, #eff6ff, #e0e7ff);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            margin-bottom: 24px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .title-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon {
+            width: 32px;
+            height: 32px;
+        }
+
+        h1 {
+            color: #1f2937;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid;
+            background: white;
+        }
+
+        .stat-card.blue {
+            background: linear-gradient(to bottom right, #dbeafe, #bfdbfe);
+            border-color: #3b82f6;
+        }
+
+        .stat-card.green {
+            background: linear-gradient(to bottom right, #d1fae5, #a7f3d0);
+            border-color: #10b981;
+        }
+
+        .stat-card.orange {
+            background: linear-gradient(to bottom right, #fed7aa, #fdba74);
+            border-color: #f59e0b;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .form-group {
+            background: #f9fafb;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .form-group h3 {
+            margin-bottom: 16px;
+            color: #1f2937;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        input[type="text"] {
+            flex: 1;
+        }
+
+        input[type="number"] {
+            width: 180px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+
+        thead {
+            background: #f9fafb;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .net-input {
+            width: 100px;
+            text-align: center;
+            font-weight: 700;
+            color: #6366f1;
+        }
+
+        .info-box {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .info-box p {
+            color: #065f46;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 24px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .chart-container h3 {
+            margin-bottom: 20px;
+            color: #1f2937;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* SVG Icons */
+        .icon-trending {
+            stroke: #6366f1;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .icon-download,
+        .icon-upload,
+        .icon-plus,
+        .icon-trash,
+        .icon-save {
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .input-row {
+                flex-direction: column;
+            }
+
+            input[type="number"] {
+                width: 100%;
+            }
+
+            .charts {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div class="title-section">
+                    <svg class="icon icon-trending" viewBox="0 0 24 24">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                        <polyline points="17 6 23 6 23 12"></polyline>
+                    </svg>
+                    <h1>Deneme Net Takip Sistemi</h1>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-success" onclick="verileriIndir()">
+                        <svg class="icon-download" width="20" height="20" viewBox="0 0 24 24">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Yedekle
+                    </button>
+                    <button class="btn-info" onclick="document.getElementById('fileInput').click()">
+                        <svg class="icon-upload" width="20" height="20" viewBox="0 0 24 24">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Yükle
+                    </button>
+                    <input type="file" id="fileInput" accept=".json" onchange="verileriYukle(event)" class="hidden">
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card blue">
+                    <div class="stat-label">Ortalama Net</div>
+                    <div class="stat-value" id="ortalama">0.00</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-label">En Yüksek Net</div>
+                    <div class="stat-value" id="enyuksek">0.00</div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-label">En Düşük Net</div>
+                    <div class="stat-value" id="endusuk">0.00</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <h3>Yeni Deneme Ekle</h3>
+                <div class="input-row">
+                    <input type="text" id="denemeAdi" placeholder="Deneme Adı (örn: TYT Deneme 1)">
+                    <input type="number" id="toplamNet" placeholder="Toplam Net" step="0.25">
+                    <button class="btn-primary" onclick="denemeEkle()">
+                        <svg class="icon-plus" width="20" height="20" viewBox="0 0 24 24">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Ekle
+                    </button>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Deneme Adı</th>
+                        <th>Tarih</th>
+                        <th style="text-align: center;">Toplam Net</th>
+                        <th style="text-align: center;">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody id="denemeListesi">
+                    <tr class="empty-state">
+                        <td colspan="4">Henüz deneme eklenmemiş. Yukarıdan yeni deneme ekleyebilirsiniz.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <svg class="icon-save" width="24" height="24" viewBox="0 0 24 24" style="stroke: #10b981;">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                <p><strong>Verileriniz otomatik olarak tarayıcınızda kaydediliyor.</strong> Ek güvenlik için "Yedekle" butonuyla dosya olarak indirebilirsiniz.</p>
+            </div>
+        </div>
+
+        <div class="charts" id="grafikler" style="display: none;">
+            <div class="chart-container">
+                <h3>Net Gelişim Grafiği</h3>
+                <canvas id="lineChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Net Karşılaştırma</h3>
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let denemeler = [];
+        let lineChart, barChart;
+
+        window.onload = function() {
+            const kayitliVeri = localStorage.getItem('denemeler');
+            if (kayitliVeri) {
+                denemeler = JSON.parse(kayitliVeri);
+                tabloGuncelle();
+                grafikleriGuncelle();
+            }
+        };
+
+        function denemeEkle() {
+            const ad = document.getElementById('denemeAdi').value.trim();
+            const net = parseFloat(document.getElementById('toplamNet').value);
+
+            if (!ad || isNaN(net)) {
+                alert('Lütfen deneme adı ve net değerini girin!');
+                return;
+            }
+
+            const yeniDeneme = {
+                id: Date.now(),
+                ad: ad,
+                net: net,
+                tarih: new Date().toLocaleDateString('tr-TR')
+            };
+
+            denemeler.push(yeniDeneme);
+            verileriKaydet();
+            tabloGuncelle();
+            grafikleriGuncelle();
+
+            document.getElementById('denemeAdi').value = '';
+            document.getElementById('toplamNet').value = '';
+        }
+
+        function denemeSil(id) {
+            if (confirm('Bu denemeyi silmek istediğinize emin misiniz?')) {
+                denemeler = denemeler.filter(d => d.id !== id);
+                verileriKaydet();
+                tabloGuncelle();
+                grafikleriGuncelle();
+            }
+        }
+
+        function netGuncelle(id, yeniNet) {
+            const deneme = denemeler.find(d => d.id === id);
+            if (deneme) {
+                deneme.net = parseFloat(yeniNet) || 0;
+                verileriKaydet();
+                istatistikleriGuncelle();
+                grafikleriGuncelle();
+            }
+        }
+
+        function tabloGuncelle() {
+            const tbody = document.getElementById('denemeListesi');
+            
+            if (denemeler.length === 0) {
+                tbody.innerHTML = '<tr class="empty-state"><td colspan="4">Henüz deneme eklenmemiş. Yukarıdan yeni deneme ekleyebilirsiniz.</td></tr>';
+                document.getElementById('grafikler').style.display = 'none';
+                istatistikleriGuncelle();
+                return;
+            }
+
+            tbody.innerHTML = denemeler.map(deneme => `
+                <tr>
+                    <td><strong>${deneme.ad}</strong></td>
+                    <td>${deneme.tarih}</td>
+                    <td style="text-align: center;">
+                        <input type="number" class="net-input" value="${deneme.net}" 
+                               step="0.25" onchange="netGuncelle(${deneme.id}, this.value)">
+                    </td>
+                    <td style="text-align: center;">
+                        <button class="btn-danger" onclick="denemeSil(${deneme.id})">
+                            <svg class="icon-trash" width="16" height="16" viewBox="0 0 24 24">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            Sil
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            istatistikleriGuncelle();
+            document.getElementById('grafikler').style.display = 'grid';
+        }
+
+        function istatistikleriGuncelle() {
+            if (denemeler.length === 0) {
+                document.getElementById('ortalama').textContent = '0.00';
+                document.getElementById('enyuksek').textContent = '0.00';
+                document.getElementById('endusuk').textContent = '0.00';
+                return;
+            }
+
+            const netler = denemeler.map(d => d.net);
+            const ortalama = (netler.reduce((a, b) => a + b, 0) / netler.length).toFixed(2);
+            const enyuksek = Math.max(...netler).toFixed(2);
+            const endusuk = Math.min(...netler).toFixed(2);
+
+            document.getElementById('ortalama').textContent = ortalama;
+            document.getElementById('enyuksek').textContent = enyuksek;
+            document.getElementById('endusuk').textContent = endusuk;
+        }
+
+        function grafikleriGuncelle() {
+            if (denemeler.length === 0) return;
+
+            const labels = denemeler.map(d => d.ad);
+            const data = denemeler.map(d => d.net);
+
+            if (lineChart) lineChart.destroy();
+            const ctxLine = document.getElementById('lineChart').getContext('2d');
+            lineChart = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Toplam Net',
+                        data: data,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                font: {
+                                    size: 13,
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f3f4f6'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            if (barChart) barChart.destroy();
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            barChart = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Toplam Net',
+                        data: data,
+                        backgroundColor: '#6366f1',
+                        borderColor: '#4f46e5',
+                        borderWidth: 2,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                font: {
+                                    size: 13,
+                                    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto'
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f3f4f6'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function verileriKaydet() {
+            localStorage.setItem('denemeler', JSON.stringify(denemeler));
+        }
+
+        function verileriIndir() {
+            const veri = JSON.stringify(denemeler, null, 2);
+            const blob = new Blob([veri], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `deneme-netleri-${new Date().toLocaleDateString('tr-TR').replace(/\./g, '-')}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function verileriYukle(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        denemeler = JSON.parse(e.target.result);
+                        verileriKaydet();
+                        tabloGuncelle();
+                        grafikleriGuncelle();
+                        alert('Veriler başarıyla yüklendi!');
+                    } catch (error) {
+                        alert('Dosya yüklenirken hata oluştu!');
+                    }
+                };
+                reader.readAsText(file);
+            }
+            event.target.value = '';
+        }
+    </script>
+</body>
+</html>
