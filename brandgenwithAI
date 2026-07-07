@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marka Adı Atölyesi — AI Destekli İsim Üreteci</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F7FB;
+    --panel:#FFFFFF;
+    --panel-line:#E9E8F2;
+    --ink:#221F33;
+    --ink-dim:#8985A6;
+    --accent:#5B4FE9;
+    --accent-soft:#EEECFF;
+    --accent-dark:#413AA8;
+    --like:#22A06B;
+    --like-soft:#E4F6ED;
+    --dislike:#E0574D;
+    --dislike-soft:#FBE7E5;
+    --radius:16px;
+    --font-display:'Fraunces', serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    padding:32px 20px 80px;
+  }
+  .wrap{max-width:960px; margin:0 auto;}
+
+  header.top{display:flex; align-items:center; justify-content:center; margin-bottom:34px;}
+  .brandmark{display:flex; align-items:center; gap:14px;}
+  .stamp{width:44px; height:44px; flex:0 0 auto;}
+  .brand-copy .eyebrow{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--accent); margin:0 0 4px; text-align:left;
+  }
+  .brand-copy h1{font-family:var(--font-display); font-weight:600; font-size:22px; margin:0; color:var(--ink);}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:20px;
+    padding:8px;
+    box-shadow: 0 30px 60px -35px rgba(34,31,51,0.18);
+  }
+  .tabs{display:flex; gap:6px; padding:10px; flex-wrap:wrap;}
+  .tab{
+    flex:1 1 140px; text-align:center; font-family:var(--font-mono); font-size:12px; letter-spacing:.06em;
+    padding:12px 10px; border-radius:12px; color:var(--ink-dim); cursor:pointer; border:1px solid transparent;
+    transition:.15s; user-select:none;
+  }
+  .tab .num{color:var(--accent); margin-right:6px;}
+  .tab.active{background:var(--accent-soft); color:var(--accent-dark); border-color:var(--accent-soft);}
+  .tab.done .num::after{content:" ✓"; color:var(--like);}
+
+  .panel{padding:30px 26px 24px;}
+  .panel h2{font-family:var(--font-display); font-weight:600; font-size:24px; margin:0 0 6px;}
+  .panel .hint{color:var(--ink-dim); font-size:13.5px; margin:0 0 22px; line-height:1.5;}
+
+  textarea, input[type=text]{
+    width:100%; background:#FCFCFF; border:1px solid var(--panel-line); color:var(--ink);
+    font-family:var(--font-body); font-size:14.5px; border-radius:10px; padding:13px 14px; outline:none;
+    transition:.15s;
+  }
+  textarea{min-height:110px; resize:vertical; line-height:1.5;}
+  textarea:focus, input[type=text]:focus{border-color:var(--accent);}
+  label.field-label{display:block; font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-dim); margin:0 0 8px;}
+  .field{margin-bottom:20px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:620px){.field-row{grid-template-columns:1fr;}}
+
+  .option-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  @media (max-width:620px){.option-grid{grid-template-columns:1fr;}}
+  .option{
+    position:relative; border:1px solid var(--panel-line); background:#FCFCFF;
+    border-radius:12px; padding:14px 16px 14px 44px; cursor:pointer; transition:.15s;
+  }
+  .option:hover{border-color:var(--accent);}
+  .option input{position:absolute; opacity:0; inset:0; cursor:pointer;}
+  .option .dot{
+    position:absolute; left:16px; top:16px; width:16px; height:16px; border-radius:50%;
+    border:2px solid var(--ink-dim);
+  }
+  .option input:checked ~ .dot{border-color:var(--accent);}
+  .option input:checked ~ .dot::after{content:""; position:absolute; inset:3px; border-radius:50%; background:var(--accent);}
+  .option input:checked ~ .title{color:var(--accent-dark);}
+  .option.selected{border-color:var(--accent); background:var(--accent-soft);}
+  .option .title{font-weight:600; font-size:14.5px; display:block; margin-bottom:3px; color:var(--ink);}
+  .option .desc{font-size:12.5px; color:var(--ink-dim);}
+
+  .pill-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .pill{
+    font-family:var(--font-mono); font-size:12px; padding:9px 14px; border-radius:999px;
+    border:1px solid var(--panel-line); background:#FCFCFF; color:var(--ink-dim); cursor:pointer; transition:.15s;
+  }
+  .pill.active{border-color:var(--accent); color:var(--accent-dark); background:var(--accent-soft);}
+
+  .panel-footer{display:flex; justify-content:space-between; align-items:center; padding-top:8px; margin-top:6px; border-top:1px solid var(--panel-line);}
+  .btn{
+    font-family:var(--font-body); font-weight:600; font-size:14px; border-radius:10px; border:none;
+    padding:13px 22px; cursor:pointer; transition:.15s;
+  }
+  .btn-primary{background:var(--accent); color:#fff;}
+  .btn-primary:hover{background:var(--accent-dark);}
+  .btn-primary:disabled{background:#D8D6EC; color:#A6A3C4; cursor:not-allowed;}
+  .btn-ghost{background:transparent; color:var(--ink-dim); border:1px solid var(--panel-line);}
+  .btn-ghost:hover{color:var(--ink); border-color:var(--ink-dim);}
+  .step-note{font-family:var(--font-mono); font-size:11px; color:var(--ink-dim);}
+
+  .results-topbar{display:flex; gap:8px; margin:34px 0 18px; flex-wrap:wrap; justify-content:center;}
+  .results-topbar .btn-ghost.active{background:var(--accent-soft); color:var(--accent-dark); border-color:var(--accent);}
+
+  .status-banner{
+    font-family:var(--font-mono); font-size:12.5px; padding:12px 16px; border-radius:10px; margin:0 auto 18px; max-width:440px;
+    border:1px solid var(--panel-line); background:var(--panel); color:var(--ink-dim); text-align:center;
+  }
+  .status-banner.error{border-color:var(--dislike); color:#9c2f26; background:var(--dislike-soft);}
+
+  .swipe-stage{display:flex; flex-direction:column; align-items:center; gap:22px; padding:10px 0 30px;}
+  .progress{font-family:var(--font-mono); font-size:12px; color:var(--ink-dim); letter-spacing:.06em;}
+  .swipe-card-wrap{
+    position:relative; width:100%; max-width:380px; height:520px; touch-action:none;
+  }
+  .swipe-card{
+    position:absolute; inset:0; border-radius:22px; padding:34px 28px;
+    display:flex; flex-direction:column; justify-content:center; align-items:flex-start;
+    box-shadow:0 24px 50px -24px rgba(34,31,51,0.30);
+    user-select:none; cursor:grab;
+  }
+  .swipe-card.peek{ transform:scale(0.94) translateY(14px); opacity:.7; z-index:1; cursor:default;}
+  .swipe-card.active{ z-index:2; transition:transform .28s ease, opacity .28s ease;}
+  .swipe-card.active.dragging{ transition:none; cursor:grabbing;}
+  .swipe-card .name{line-height:1.12; word-break:break-word;}
+  .swipe-card .rationale{
+    font-family:var(--font-mono); font-size:12.5px; opacity:.8; margin-top:18px; line-height:1.5;
+  }
+  .swipe-card .stamp-badge{
+    position:absolute; top:26px; left:28px; font-family:var(--font-mono); font-size:10.5px;
+    letter-spacing:.14em; text-transform:uppercase; opacity:.65;
+  }
+  .swipe-card .flag{
+    position:absolute; top:30px; right:24px; font-family:var(--font-mono); font-weight:700; font-size:14px;
+    letter-spacing:.1em; padding:6px 12px; border-radius:8px; opacity:0; transform:rotate(8deg);
+  }
+  .flag.like-flag{color:var(--like); border:2px solid var(--like);}
+  .flag.dislike-flag{color:var(--dislike); border:2px solid var(--dislike); transform:rotate(-8deg);}
+
+  .swipe-actions{display:flex; gap:22px; align-items:center;}
+  .action-btn{
+    width:64px; height:64px; border-radius:50%; border:1px solid var(--panel-line); background:var(--panel);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 12px 24px -14px rgba(34,31,51,0.3);
+    transition:.15s;
+  }
+  .action-btn:hover{transform:translateY(-2px);}
+  .action-btn.dislike{color:var(--dislike);}
+  .action-btn.dislike:hover{background:var(--dislike-soft); border-color:var(--dislike);}
+  .action-btn.like{color:var(--like);}
+  .action-btn.like:hover{background:var(--like-soft); border-color:var(--like);}
+  .action-btn svg{width:26px; height:26px;}
+
+  .skeleton-card{background:linear-gradient(100deg, #F0EFFA 30%, #E6E4FA 50%, #F0EFFA 70%); background-size:200% 100%; animation:shimmer 1.4s infinite;}
+  @keyframes shimmer{0%{background-position:200% 0;} 100%{background-position:-200% 0;}}
+
+  .more-wrap{display:flex; justify-content:center; margin-top:8px;}
+
+  .empty{
+    font-family:var(--font-mono); font-size:13px; color:var(--ink-dim); text-align:center; padding:50px 10px;
+  }
+
+  .saved-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(210px,1fr)); gap:14px; max-width:820px; margin:0 auto;}
+  .saved-item{
+    border:1px solid var(--panel-line); border-radius:14px; padding:16px 18px; background:var(--panel);
+  }
+  .saved-item .name{font-family:var(--font-display); font-weight:600; font-size:1.15rem; margin-bottom:6px;}
+  .saved-item .rationale{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-dim); line-height:1.4;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brandmark">
+      <svg class="stamp" viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="22" stroke="#5B4FE9" stroke-width="1.5"/>
+        <circle cx="24" cy="24" r="16" stroke="#5B4FE9" stroke-width="1"/>
+        <path d="M16 30 L24 14 L32 30 M19 25 H29" stroke="#5B4FE9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="brand-copy">
+        <p class="eyebrow">AI Destekli</p>
+        <h1>Marka Adı Atölyesi</h1>
+      </div>
+    </div>
+  </header>
+
+  <div class="card" id="wizardCard">
+    <div class="tabs" id="tabsBar"></div>
+    <div id="panelsHost"></div>
+  </div>
+
+  <div id="resultsView" style="display:none;">
+    <div class="results-topbar">
+      <button class="btn btn-ghost" id="backToWizard">← Yeni İsimler Oluştur</button>
+      <button class="btn btn-ghost active" id="tabResults">Keşfet</button>
+      <button class="btn btn-ghost" id="tabSaved">Beğendiklerim <span id="savedCount"></span></button>
+    </div>
+    <div id="statusHost"></div>
+
+    <div id="swipeSection" class="swipe-stage">
+      <div class="progress" id="progressLabel"></div>
+      <div class="swipe-card-wrap" id="swipeCardWrap"></div>
+      <div class="swipe-actions">
+        <div class="action-btn dislike" id="dislikeBtn" title="Beğenmedim">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </div>
+        <div class="action-btn like" id="likeBtn" title="Beğendim">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 21s-7.5-4.6-10-9.1C.5 8.4 2 4.5 5.7 4c2-.3 3.9.7 5 2.3C11.8 4.7 13.7 3.7 15.7 4c3.7.5 5.2 4.4 3.7 7.9C19.5 16.4 12 21 12 21z"/></svg>
+        </div>
+      </div>
+      <div class="more-wrap" id="moreWrap" style="display:none;">
+        <button class="btn btn-primary" id="moreBtn">Daha Fazla İsim Öner</button>
+      </div>
+    </div>
+
+    <div class="saved-grid" id="savedGrid" style="display:none;"></div>
+    <div class="empty" id="savedEmpty" style="display:none;">Henüz beğendiğiniz bir isim yok. Kartları sağa kaydırarak veya kalp butonuna basarak beğenebilirsiniz.</div>
+  </div>
+
+</div>
+
+<script>
+/* ==========================================================
+   
+   ========================================================== */
+const CONFIG = {
+  // ÖRNEK: "https://isim-ureteci-api.senin-hesabin.workers.dev"
+  WORKER_URL: "https://frosty-glade-23c2.omer-963.workers.dev/" 
+};
+
+/* ---------------- STATE ---------------- */
+const state = {
+  step: 0,
+  business: "",
+  nameStyle: "auto",
+  randomness: "medium",
+  keywords: "",
+  tone: "profesyonel",
+  language: "farketmez",
+  avoid: "",
+  results: [],
+  queueIndex: 0,
+  saved: [],
+  view: "results"
+};
+
+const NAME_STYLES = [
+  {v:"auto", t:"Otomatik", d:"Tüm stiller karışık"},
+  {v:"brandable", t:"Uydurma Marka Adı", d:"Örn: Google, Rolex gibi"},
+  {v:"evocative", t:"Çağrışımsal", d:"Örn: RedBull, Forever21 gibi"},
+  {v:"short_phrase", t:"Kısa İfade", d:"Örn: Dollar Shave Club gibi"},
+  {v:"compound", t:"Birleşik Kelime", d:"Örn: FedEx, Microsoft gibi"},
+  {v:"alt_spelling", t:"Alternatif Yazım", d:"Örn: Lyft, Fiverr gibi"},
+  {v:"non_english", t:"Yabancı Dil Kökenli", d:"Örn: Toyota, Audi gibi"},
+  {v:"real_word", t:"Gerçek Kelime", d:"Örn: Apple, Amazon gibi"},
+];
+const RANDOMNESS = [
+  {v:"low", t:"Az Rastgele", d:"En doğrudan, tahmin edilebilir öneriler"},
+  {v:"medium", t:"Dengeli", d:"Daha yaratıcı ve çeşitli sonuçlar"},
+  {v:"high", t:"Çok Rastgele", d:"Sıra dışı, beklenmedik fikirler"},
+];
+const TONES = ["profesyonel","eğlenceli","lüks","minimalist","cesur / enerjik"];
+const LANGS = [{v:"farketmez",t:"Fark etmez"},{v:"tr",t:"Türkçe"},{v:"en",t:"İngilizce"}];
+const STEPS = ["İşletme", "İsim Stili", "Rastgelelik", "Marka Bilgisi"];
+
+/* ---------------- WIZARD RENDER ---------------- */
+function renderTabs(){
+  const bar = document.getElementById("tabsBar");
+  bar.innerHTML = "";
+  STEPS.forEach((label, i)=>{
+    const el = document.createElement("div");
+    el.className = "tab" + (i===state.step?" active":"") + (i<state.step?" done":"");
+    el.innerHTML = `<span class="num">0${i+1}</span>${label}`;
+    el.onclick = ()=>{ if(i <= maxReachableStep()) { state.step = i; renderAll(); } };
+    bar.appendChild(el);
+  });
+}
+function maxReachableStep(){
+  let m = 0;
+  if(state.business.trim().length >= 8) m = 1;
+  if(m===1) m = 2;
+  if(m===2) m = 3;
+  return Math.max(m, state.step);
+}
+function stepValid(i){
+  if(i===0) return state.business.trim().length >= 8;
+  return true;
+}
+function renderPanel(){
+  const host = document.getElementById("panelsHost");
+  let html = "";
+  if(state.step===0){
+    html = `
+    <div class="panel">
+      <h2>İşinizi kısaca özetleyin</h2>
+      <p class="hint">Markanızın ne yaptığını 1-2 cümleyle anlatın. Bu bilgi, üretilecek isimlerin temelini oluşturacak.</p>
+      <div class="field">
+        <textarea id="businessInput" placeholder="Örn: Teknoloji haberleri paylaşan bir web sitesi">${state.business}</textarea>
+      </div>
+    </div>`;
+  } else if(state.step===1){
+    html = `<div class="panel">
+      <h2>Bir isim stili seçin</h2>
+      <p class="hint">Üretilecek isimlerin genel karakterini belirler.</p>
+      <div class="option-grid">
+        ${NAME_STYLES.map(o=>optionHtml("nameStyle", o)).join("")}
+      </div>
+    </div>`;
+  } else if(state.step===2){
+    html = `<div class="panel">
+      <h2>Üretim rastgeleliğini seçin</h2>
+      <p class="hint">Sonuçların ne kadar beklenmedik olacağını ayarlar.</p>
+      <div class="option-grid" style="grid-template-columns:1fr;">
+        ${RANDOMNESS.map(o=>optionHtml("randomness", o)).join("")}
+      </div>
+    </div>`;
+  } else if(state.step===3){
+    html = `<div class="panel">
+      <h2>Marka bilgisi <span style="color:var(--ink-dim); font-weight:400; font-size:15px;">(opsiyonel, sonuçları iyileştirir)</span></h2>
+      <p class="hint">Bu detaylar sonuçları daha isabetli hale getirir, boş bırakabilirsiniz.</p>
+      <div class="field">
+        <label class="field-label">Sektör / Anahtar Kelimeler</label>
+        <input type="text" id="keywordsInput" placeholder="Örn: teknoloji, haber, yapay zeka" value="${state.keywords}">
+      </div>
+      <div class="field">
+        <label class="field-label">Marka Tonu</label>
+        <div class="pill-row" id="tonePills">
+          ${TONES.map(t=>`<div class="pill ${state.tone===t?'active':''}" data-tone="${t}">${t}</div>`).join("")}
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Dil Tercihi</label>
+          <select id="langSelect" style="width:100%; background:#FCFCFF; border:1px solid var(--panel-line); color:var(--ink); font-family:var(--font-body); font-size:14.5px; border-radius:10px; padding:13px 14px;">
+            ${LANGS.map(l=>`<option value="${l.v}" ${state.language===l.v?'selected':''}>${l.t}</option>`).join("")}
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Kaçınılacak Kelimeler</label>
+          <input type="text" id="avoidInput" placeholder="Opsiyonel" value="${state.avoid}">
+        </div>
+      </div>
+    </div>`;
+  }
+  host.innerHTML = html + footerHtml();
+  attachPanelEvents();
+}
+function optionHtml(group, o){
+  const checked = state[group]===o.v ? "checked" : "";
+  const selClass = state[group]===o.v ? " selected" : "";
+  return `<label class="option${selClass}" data-group="${group}" data-val="${o.v}">
+    <input type="radio" name="${group}" ${checked}>
+    <span class="dot"></span>
+    <span class="title">${o.t}</span>
+    <span class="desc">${o.d}</span>
+  </label>`;
+}
+function footerHtml(){
+  const isLast = state.step === STEPS.length-1;
+  const canNext = stepValid(state.step);
+  return `<div class="panel" style="padding-top:0;">
+    <div class="panel-footer">
+      <span class="step-note">Adım ${state.step+1} / ${STEPS.length}</span>
+      <div style="display:flex; gap:10px;">
+        ${state.step>0 ? `<button class="btn btn-ghost" id="prevBtn">Geri</button>` : ""}
+        <button class="btn btn-primary" id="nextBtn" ${canNext?"":"disabled"}>${isLast ? "İsimleri Oluştur" : "İleri"}</button>
+      </div>
+    </div>
+  </div>`;
+}
+function attachPanelEvents(){
+  if(state.step===0){
+    const ta = document.getElementById("businessInput");
+    ta.addEventListener("input", e=>{ state.business = e.target.value; refreshFooterOnly(); });
+  }
+  if(state.step===1 || state.step===2){
+    document.querySelectorAll(".option").forEach(opt=>{
+      opt.addEventListener("click", ()=>{
+        const g = opt.dataset.group, v = opt.dataset.val;
+        state[g] = v;
+        renderPanel();
+      });
+    });
+  }
+  if(state.step===3){
+    document.getElementById("keywordsInput").addEventListener("input", e=> state.keywords = e.target.value);
+    document.getElementById("avoidInput").addEventListener("input", e=> state.avoid = e.target.value);
+    document.getElementById("langSelect").addEventListener("change", e=> state.language = e.target.value);
+    document.querySelectorAll("#tonePills .pill").forEach(p=>{
+      p.addEventListener("click", ()=>{ state.tone = p.dataset.tone; renderPanel(); });
+    });
+  }
+  const nextBtn = document.getElementById("nextBtn");
+  if(nextBtn){
+    nextBtn.addEventListener("click", ()=>{
+      if(state.step === STEPS.length-1){ startGeneration(); }
+      else { state.step++; renderAll(); }
+    });
+  }
+  const prevBtn = document.getElementById("prevBtn");
+  if(prevBtn) prevBtn.addEventListener("click", ()=>{ state.step--; renderAll(); });
+}
+function refreshFooterOnly(){
+  const nextBtn = document.getElementById("nextBtn");
+  if(nextBtn) nextBtn.disabled = !stepValid(state.step);
+}
+function renderAll(){
+  renderTabs();
+  renderPanel();
+}
+
+/* ---------------- PROMPT + API CALL (WORKER ÜZERİNDEN) ---------------- */
+function styleLabel(list, v){ const f = list.find(x=>x.v===v); return f ? f.t : v; }
+
+function buildPrompt(excludeNames){
+  const excludeText = excludeNames.length
+    ? `Şu isimleri daha önce önerdin, bunları TEKRARLAMA: ${excludeNames.join(", ")}.`
+    : "";
+  return `Sen deneyimli bir marka isimlendirme (naming) uzmanısın. Aşağıdaki bilgilere göre marka/işletme adı önerileri üret.
+
+İşletme özeti: ${state.business}
+İstenen isim stili: ${styleLabel(NAME_STYLES, state.nameStyle)}
+Üretim rastgeleliği: ${styleLabel(RANDOMNESS, state.randomness)}
+Sektör/anahtar kelimeler: ${state.keywords || "belirtilmedi"}
+Marka tonu: ${state.tone}
+Dil tercihi: ${state.language}
+Kaçınılması gereken kelimeler: ${state.avoid || "yok"}
+${excludeText}
+
+Tam olarak 15 adet isim önerisi üret. Her öneri kısa (1-3 kelime), akılda kalıcı ve markaya uygun olsun. Her biri için 6-10 kelimelik kısa bir gerekçe (rationale) yaz.
+
+SADECE aşağıdaki JSON formatında, başka hiçbir açıklama, markdown işareti veya kod bloğu olmadan yanıt ver:
+[{"name":"İsim1","rationale":"kısa gerekçe"}, {"name":"İsim2","rationale":"kısa gerekçe"}]`;
+}
+
+// ARTIK GÜVENLİ WORKER URL'İMİZE İSTEK ATIYORUZ
+async function callGemini(prompt){
+  if (!CONFIG.WORKER_URL || CONFIG.WORKER_URL === "BURAYA_WORKER_URL_YAZILACAK") {
+      throw new Error("Lütfen kodun içindeki CONFIG.WORKER_URL alanına Cloudflare Worker adresinizi girin.");
+  }
+
+  const res = await fetch(CONFIG.WORKER_URL, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      // Sıcaklık ayarını da worker'a gönderiyoruz, o API'ye iletecek
+      generationConfig: { temperature: state.randomness==="high"?1.1:(state.randomness==="low"?0.4:0.75) }
+    })
+  });
+
+  if(!res.ok){
+    // Eğer Worker'dan özel bir hata mesajı gelirse (örneğin 429 limiti aşımı metni) onu gösterir
+    const errText = await res.text().catch(()=> "");
+    const errorObj = parseErrorObj(errText);
+    throw new Error(errorObj || `Sunucu isteği başarısız (${res.status}).`);
+  }
+  
+  const data = await res.json();
+  const text = data?.candidates?.[0]?.content?.parts?.map(p=>p.text).join("") || "";
+  const cleaned = text.replace(/```json/gi,"").replace(/```/g,"").trim();
+  
+  let parsed;
+  try { 
+      parsed = JSON.parse(cleaned); 
+  } catch(e) { 
+      throw new Error("Model yanıtı beklenen JSON formatında değildi, tekrar deneyin."); 
+  }
+  
+  if(!Array.isArray(parsed)) throw new Error("Model yanıtı beklenen formatta değildi.");
+  return parsed;
+}
+
+// Worker'dan dönen hata JSON ise içindeki error mesajını yakalamak için
+function parseErrorObj(str) {
+    try {
+        const obj = JSON.parse(str);
+        return obj.error || null;
+    } catch {
+        return str.slice(0, 180);
+    }
+}
+
+/* ---------------- VISUALIZATION ENGINE ---------------- */
+const PLATE_STYLES = [
+  {bg:"#1B1E3D", fg:"#F4EFE2", font:"var(--font-display)", weight:600, size:"2.6rem", tt:"none", ls:"0"},
+  {bg:"#C9A227", fg:"#1B1E3D", font:"var(--font-body)", weight:700, size:"2rem", tt:"uppercase", ls:"0.05em"},
+  {bg:"#FBF7EC", fg:"#211E2F", font:"var(--font-display)", weight:500, size:"2.5rem", tt:"none", ls:"0"},
+  {bg:"#2F5D50", fg:"#F4EFE2", font:"var(--font-mono)", weight:600, size:"1.7rem", tt:"uppercase", ls:"0.08em"},
+  {bg:"#8A3B2B", fg:"#F4EFE2", font:"var(--font-display)", weight:700, size:"2.6rem", tt:"none", ls:"0"},
+  {bg:"#3B2545", fg:"#E8CF7A", font:"var(--font-display)", weight:600, size:"2.4rem", tt:"none", ls:"0"},
+  {bg:"#EEECFF", fg:"#413AA8", font:"var(--font-body)", weight:700, size:"2rem", tt:"none", ls:"0"},
+  {bg:"#23262F", fg:"#C9A227", font:"var(--font-mono)", weight:500, size:"1.7rem", tt:"lowercase", ls:"0.06em"},
+];
+let styleOrder = [];
+function ensureStyleOrder(len){
+  while(styleOrder.length < len){
+    const shuffled = PLATE_STYLES.map((s,i)=>i);
+    for(let i=shuffled.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [shuffled[i],shuffled[j]] = [shuffled[j],shuffled[i]];
+    }
+    styleOrder = styleOrder.concat(shuffled);
+  }
+}
+function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function cardHtml(item, styleIdx, extraClass){
+  const style = PLATE_STYLES[styleIdx % PLATE_STYLES.length];
+  return `<div class="swipe-card ${extraClass}" style="background:${style.bg}; color:${style.fg};">
+    <span class="stamp-badge">Marka Adı Önerisi</span>
+    <div class="name" style="font-family:${style.font}; font-weight:${style.weight}; font-size:${style.size}; text-transform:${style.tt}; letter-spacing:${style.ls};">${escapeHtml(item.name)}</div>
+    <div class="rationale" style="color:${style.fg};">${escapeHtml(item.rationale||"")}</div>
+    <span class="flag like-flag">BEĞENDİM</span>
+    <span class="flag dislike-flag">GEÇ</span>
+  </div>`;
+}
+
+/* ---------------- GENERATION FLOW ---------------- */
+function setStatus(msg, isError){
+  const host = document.getElementById("statusHost");
+  if(!msg){ host.innerHTML=""; return; }
+  host.innerHTML = `<div class="status-banner ${isError?'error':''}">${msg}</div>`;
+}
+async function startGeneration(){
+  setViewResults();
+  setStatus("İsimler oluşturuluyor…", false);
+  showSkeletonCard();
+  document.getElementById("moreWrap").style.display = "none";
+  try{
+    const prompt = buildPrompt(state.results.map(r=>r.name));
+    const items = await callGemini(prompt);
+    state.results = state.results.concat(items);
+    ensureStyleOrder(state.results.length);
+    setStatus("", false);
+    renderSwipeCard();
+  }catch(err){
+    setStatus(err.message, true);
+    document.getElementById("swipeCardWrap").innerHTML = "";
+  }
+}
+function showSkeletonCard(){
+  document.getElementById("swipeCardWrap").innerHTML = `<div class="swipe-card active skeleton-card"></div>`;
+}
+function setViewResults(){
+  document.getElementById("wizardCard").style.display = "none";
+  document.getElementById("resultsView").style.display = "block";
+  state.view = "results";
+  document.getElementById("tabResults").classList.add("active");
+  document.getElementById("tabSaved").classList.remove("active");
+  document.getElementById("swipeSection").style.display = "flex";
+  document.getElementById("savedGrid").style.display = "none";
+  document.getElementById("savedEmpty").style.display = "none";
+}
+
+let dragState = null;
+
+function renderSwipeCard(){
+  const wrap = document.getElementById("swipeCardWrap");
+  const idx = state.queueIndex;
+  const total = state.results.length;
+  document.getElementById("progressLabel").textContent = total ? `${Math.min(idx+1,total)} / ${total}` : "";
+
+  if(idx >= total){
+    wrap.innerHTML = `<div class="empty" style="display:flex; align-items:center; justify-content:center; height:100%; border:1px dashed var(--panel-line); border-radius:22px;">Bu turdaki tüm isimleri inceldiniz.<br>Daha fazla öneri isteyebilirsiniz.</div>`;
+    document.getElementById("moreWrap").style.display = "flex";
+    return;
+  }
+  document.getElementById("moreWrap").style.display = "none";
+
+  let html = "";
+  if(idx+1 < total){
+    html += cardHtml(state.results[idx+1], idx+1, "peek");
+  }
+  html += cardHtml(state.results[idx], idx, "active");
+  wrap.innerHTML = html;
+
+  const activeCard = wrap.querySelector(".swipe-card.active");
+  attachDrag(activeCard);
+}
+
+function attachDrag(card){
+  card.addEventListener("pointerdown", (e)=>{
+    dragState = { startX: e.clientX, startY: e.clientY, dx:0 };
+    card.setPointerCapture(e.pointerId);
+    card.classList.add("dragging");
+  });
+  card.addEventListener("pointermove", (e)=>{
+    if(!dragState) return;
+    dragState.dx = e.clientX - dragState.startX;
+    const rot = dragState.dx / 18;
+    card.style.transform = `translateX(${dragState.dx}px) rotate(${rot}deg)`;
+    const likeFlag = card.querySelector(".like-flag");
+    const dislikeFlag = card.querySelector(".dislike-flag");
+    const t = Math.min(Math.abs(dragState.dx)/90, 1);
+    if(dragState.dx > 0){ likeFlag.style.opacity = t; dislikeFlag.style.opacity = 0; }
+    else { dislikeFlag.style.opacity = t; likeFlag.style.opacity = 0; }
+  });
+  card.addEventListener("pointerup", ()=> endDrag(card));
+  card.addEventListener("pointercancel", ()=> endDrag(card));
+}
+function endDrag(card){
+  if(!dragState) return;
+  card.classList.remove("dragging");
+  const dx = dragState.dx;
+  dragState = null;
+  if(dx > 90){ commitSwipe("like"); }
+  else if(dx < -90){ commitSwipe("dislike"); }
+  else{
+    card.style.transform = "translateX(0) rotate(0)";
+    const likeFlag = card.querySelector(".like-flag");
+    const dislikeFlag = card.querySelector(".dislike-flag");
+    if(likeFlag) likeFlag.style.opacity = 0;
+    if(dislikeFlag) dislikeFlag.style.opacity = 0;
+  }
+}
+function commitSwipe(direction){
+  const wrap = document.getElementById("swipeCardWrap");
+  const card = wrap.querySelector(".swipe-card.active");
+  if(!card) return;
+  const item = state.results[state.queueIndex];
+  if(direction === "like"){
+    if(!state.saved.some(s=>s.name===item.name)) state.saved.push(item);
+    card.style.transform = `translateX(600px) rotate(18deg)`;
+  } else {
+    card.style.transform = `translateX(-600px) rotate(-18deg)`;
+  }
+  card.style.opacity = "0";
+  updateSavedCount();
+  state.queueIndex++;
+  setTimeout(renderSwipeCard, 220);
+}
+
+document.getElementById("likeBtn").addEventListener("click", ()=>{
+  if(state.queueIndex < state.results.length) commitSwipe("like");
+});
+document.getElementById("dislikeBtn").addEventListener("click", ()=>{
+  if(state.queueIndex < state.results.length) commitSwipe("dislike");
+});
+
+function renderSavedGrid(){
+  const grid = document.getElementById("savedGrid");
+  const empty = document.getElementById("savedEmpty");
+  if(!state.saved.length){
+    grid.style.display = "none";
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+  grid.style.display = "grid";
+  grid.innerHTML = state.saved.map(item=>`
+    <div class="saved-item">
+      <div class="name">${escapeHtml(item.name)}</div>
+      <div class="rationale">${escapeHtml(item.rationale||"")}</div>
+    </div>`).join("");
+}
+function updateSavedCount(){
+  const el = document.getElementById("savedCount");
+  el.textContent = state.saved.length ? `(${state.saved.length})` : "";
+}
+
+document.getElementById("backToWizard").addEventListener("click", ()=>{
+  document.getElementById("wizardCard").style.display = "block";
+  document.getElementById("resultsView").style.display = "none";
+});
+document.getElementById("tabResults").addEventListener("click", ()=>{
+  state.view = "results";
+  document.getElementById("tabResults").classList.add("active");
+  document.getElementById("tabSaved").classList.remove("active");
+  document.getElementById("swipeSection").style.display = "flex";
+  document.getElementById("savedGrid").style.display = "none";
+  document.getElementById("savedEmpty").style.display = "none";
+  setStatus("", false);
+  renderSwipeCard();
+});
+document.getElementById("tabSaved").addEventListener("click", ()=>{
+  state.view = "saved";
+  document.getElementById("tabSaved").classList.add("active");
+  document.getElementById("tabResults").classList.remove("active");
+  document.getElementById("swipeSection").style.display = "none";
+  setStatus("", false);
+  renderSavedGrid();
+});
+document.getElementById("moreBtn").addEventListener("click", async ()=>{
+  const btn = document.getElementById("moreBtn");
+  btn.disabled = true; btn.textContent = "Oluşturuluyor…";
+  try{
+    const prompt = buildPrompt(state.results.map(r=>r.name));
+    const items = await callGemini(prompt);
+    state.results = state.results.concat(items);
+    ensureStyleOrder(state.results.length);
+    renderSwipeCard();
+  }catch(err){
+    setStatus(err.message, true);
+  }
+  btn.disabled = false; btn.textContent = "Daha Fazla İsim Öner";
+});
+
+renderAll();
+updateSavedCount();
+</script>
+</body>
+</html>
