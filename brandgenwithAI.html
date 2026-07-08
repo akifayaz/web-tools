@@ -482,12 +482,19 @@ async function callGemini(prompt){
 function parseErrorObj(str) {
     try {
         const obj = JSON.parse(str);
-        return obj.error || null;
+        if (obj.error) {
+            // Eğer hata Gemini'den gelen iç içe geçmiş (nested) bir nesneyse içindeki mesajı al
+            if (typeof obj.error === 'object' && obj.error.message) {
+                return obj.error.message;
+            }
+            // Eğer Worker'dan dönen düz bir metinse direkt onu dön
+            return obj.error;
+        }
+        return null;
     } catch {
         return str.slice(0, 180);
     }
 }
-
 /* ---------------- VISUALIZATION ENGINE ---------------- */
 const PLATE_STYLES = [
   {bg:"#1B1E3D", fg:"#F4EFE2", font:"var(--font-display)", weight:600, size:"2.6rem", tt:"none", ls:"0"},
