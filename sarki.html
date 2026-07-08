@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bilgisayar Time - Şarkı Sözü Oluşturucu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F9FAFB;
+    --panel: #FFFFFF;
+    --border: #E5E7EB;
+    --ink: #111827;
+    --ink-dim: #6B7280;
+    --accent: #1ed760; /* Spotify Yeşili */
+    --accent-hover: #17b650;
+    --accent-soft: #e8fbf0;
+    --success: #10B981;
+    --radius: 12px;
+    --font: 'Inter', sans-serif;
+  }
+  
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  
+  body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font);
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 650px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  header p {
+    font-size: 15px;
+    color: var(--ink-dim);
+    margin: 0;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+    margin-bottom: 24px;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 500px) {
+    .field-row { grid-template-columns: 1fr; }
+  }
+
+  .field-group {
+    margin-bottom: 20px;
+  }
+  label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  
+  textarea, input[type="text"], select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 14.5px;
+    border-radius: 8px;
+    padding: 12px 14px;
+    outline: none;
+    transition: all 0.2s;
+    line-height: 1.5;
+  }
+  select { cursor: pointer; }
+  textarea {
+    min-height: 90px;
+    resize: vertical;
+  }
+  textarea:focus, input[type="text"]:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    font-family: var(--font);
+    font-weight: 600;
+    font-size: 15px;
+    border-radius: 8px;
+    border: none;
+    padding: 14px 24px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled {
+    background: #D1D5DB;
+    cursor: not-allowed;
+    transform: none;
+    text-shadow: none;
+  }
+  
+  .btn-secondary {
+    background: var(--bg);
+    color: var(--ink);
+    border: 1px solid var(--border);
+    margin-top: 12px;
+  }
+  .btn-secondary:hover {
+    background: #F3F4F6;
+  }
+
+  .status {
+    font-size: 13px;
+    text-align: center;
+    margin-top: 16px;
+    color: var(--ink-dim);
+    display: none;
+  }
+
+  #resultCard {
+    display: none;
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .lyrics-display {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.7;
+    white-space: pre-wrap; /* Satır atlamalarını korur (Çok Önemli) */
+    min-height: 150px;
+    max-height: 500px;
+    overflow-y: auto;
+    font-style: italic;
+  }
+
+  .error-text {
+    color: #E11D48;
+    text-align: center;
+    font-size: 14px;
+    margin-top: 12px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+      Şarkı Sözü Oluşturucu
+    </h1>
+    <p>Tarzını seç, konunu belirle, yapay zeka senin için yazsın.</p>
+  </header>
+
+  <div class="card" id="inputCard">
+    <div class="field-row">
+      <div class="field-group" style="margin-bottom: 0;">
+        <label for="songGenre">Müzik Türü</label>
+        <select id="songGenre">
+          <option value="Pop">Pop</option>
+          <option value="Rap / Hip-Hop">Rap / Hip-Hop</option>
+          <option value="Rock / Alternatif">Rock / Alternatif</option>
+          <option value="Arabesk / Fantezi">Arabesk / Fantezi</option>
+          <option value="Türk Halk Müziği">Türk Halk Müziği</option>
+          <option value="R&B">R&B</option>
+          <option value="Elektronik / EDM">Elektronik / EDM</option>
+        </select>
+      </div>
+      <div class="field-group" style="margin-bottom: 0;">
+        <label for="songMood">Şarkının Duygusu</label>
+        <select id="songMood">
+          <option value="Hüzünlü / Melankolik">Hüzünlü / Melankolik</option>
+          <option value="Enerjik / Hareketli">Enerjik / Hareketli</option>
+          <option value="İsyankar / Öfkeli">İsyankar / Öfkeli</option>
+          <option value="Romantik / Aşk dolu">Romantik / Aşk dolu</option>
+          <option value="Umutlu / İlham Verici">Umutlu / İlham Verici</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="songTopic">Şarkı Ne Hakkında Olacak?</label>
+      <textarea id="songTopic" placeholder="Örn: Yağmurlu bir günde terk edilmiş hissetmek, eski günlere duyulan özlem..."></textarea>
+    </div>
+    
+    <div class="field-group">
+      <label for="songKeywords">İçinde Geçmesini İstediğin Kelimeler (Opsiyonel)</label>
+      <input type="text" id="songKeywords" placeholder="Örn: gece, yıldızlar, sokak lambası, veda">
+    </div>
+
+    <button class="btn btn-primary" id="generateBtn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Sözleri Yazdır
+    </button>
+    <div id="loadingStatus" class="status">İlham perileri çalışıyor, sözler yazılıyor...</div>
+    <div id="errorStatus" class="error-text"></div>
+  </div>
+
+  <div class="card" id="resultCard">
+    <label>Oluşturulan Şarkı Sözleri</label>
+    <div class="lyrics-display" id="lyricsOutput"></div>
+    
+    <button class="btn btn-primary" id="copyBtn" style="margin-top: 16px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Sözleri Kopyala
+    </button>
+    
+    <button class="btn btn-secondary" id="resetBtn">Yeni Bir Şarkı Yaz</button>
+  </div>
+</div>
+
+<script>
+  const WORKER_URL = "https://frosty-glade-23c2.omer-963.workers.dev";
+
+  const generateBtn = document.getElementById('generateBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const songGenre = document.getElementById('songGenre');
+  const songMood = document.getElementById('songMood');
+  const songTopic = document.getElementById('songTopic');
+  const songKeywords = document.getElementById('songKeywords');
+  const lyricsOutput = document.getElementById('lyricsOutput');
+  const inputCard = document.getElementById('inputCard');
+  const resultCard = document.getElementById('resultCard');
+  const loadingStatus = document.getElementById('loadingStatus');
+  const errorStatus = document.getElementById('errorStatus');
+
+  generateBtn.addEventListener('click', async () => {
+    const topic = songTopic.value.trim();
+    if (!topic) {
+      showError("Lütfen şarkının konusunu kısaca anlatın.");
+      return;
+    }
+
+    setLoading(true);
+    showError("");
+
+    const prompt = `Sen yaratıcı ve usta bir şarkı sözü yazarısın. Kullanıcının verdiği detaylara göre hit olabilecek, akılda kalıcı şarkı sözleri yaz.
+    
+    Müzik Türü: ${songGenre.value}
+    Şarkının Duygusu: ${songMood.value}
+    Konu: ${topic}
+    Geçmesi İstenen Kelimeler: ${songKeywords.value.trim() || 'Belirtilmedi'}
+    
+    KURALLAR:
+    1. Şarkı sözlerini yapılandırarak yaz (Örn: [Bölüm 1], [Nakarat], [Bölüm 2], [Köprü], [Nakarat]).
+    2. Seçilen müzik türünün kafiye ve ritim yapısına uygun kelimeler seç.
+    3. Sadece şarkı sözlerini ver. Başında veya sonunda "İşte sözler" gibi ekstra sohbet metinleri OLMASIN.`;
+
+    try {
+      const response = await fetch(WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.85 } // Yaratıcılık için sıcaklık biraz yüksek tutuldu
+        })
+      });
+
+      if (!response.ok) throw new Error("Sunucu ile iletişim kurulamadı.");
+      
+      const data = await response.json();
+      let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      
+      text = text.replace(/```/g, "").trim();
+      
+      if (!text) throw new Error("Şarkı sözü üretilemedi, lütfen konuyu değiştirip tekrar deneyin.");
+
+      lyricsOutput.textContent = text;
+      
+      inputCard.style.display = "none";
+      resultCard.style.display = "block";
+
+    } catch (err) {
+      showError(err.message || "Bir hata oluştu, lütfen tekrar deneyin.");
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(lyricsOutput.textContent);
+      
+      const originalText = copyBtn.innerHTML;
+      copyBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Kopyalandı!`;
+      
+      setTimeout(() => {
+        copyBtn.innerHTML = originalText;
+      }, 2000);
+    } catch (err) {
+      alert("Kopyalama başarısız oldu. Lütfen metni manuel olarak seçip kopyalayın.");
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    songTopic.value = "";
+    songKeywords.value = "";
+    resultCard.style.display = "none";
+    inputCard.style.display = "block";
+    songTopic.focus();
+  });
+
+  function setLoading(isLoading) {
+    generateBtn.disabled = isLoading;
+    loadingStatus.style.display = isLoading ? "block" : "none";
+    if (isLoading) {
+      generateBtn.innerHTML = "Oluşturuluyor...";
+    } else {
+      generateBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Sözleri Yazdır`;
+    }
+  }
+
+  function showError(msg) {
+    errorStatus.textContent = msg;
+    errorStatus.style.display = msg ? "block" : "none";
+  }
+
+  // Güvenlik İframe Kontrolü
+  (function() {
+      var iframeIçinde = (window.self !== window.top);
+      if (iframeIçinde) {
+          var referrer = document.referrer;
+          if (!referrer.includes("bilgisayartime.com")) {
+              document.body.innerHTML = "<h1 style='text-align:center; margin-top:20vh;'>Erişim Engellendi: Bu sayfa sadece Bilgisayar Time üzerinden görüntülenebilir.</h1>";
+          }
+      } else {
+          document.body.innerHTML = "<h1 style='text-align:center; margin-top:20vh;'>Erişim Engellendi: Bu sayfaya direkt erişemezsiniz.</h1>";
+      }
+  })();
+</script>
+</body>
+</html>
