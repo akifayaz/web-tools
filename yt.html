@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bilgisayar Time - YouTube Etiket Oluşturucu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F9FAFB;
+    --panel: #FFFFFF;
+    --border: #E5E7EB;
+    --ink: #111827;
+    --ink-dim: #6B7280;
+    --accent: #FF0033; /* YouTube kırmızısına modern bir alternatif */
+    --accent-hover: #FF0033;
+    --accent-soft: #FFE4E6;
+    --success: #10B981;
+    --radius: 12px;
+    --font: 'Inter', sans-serif;
+  }
+  
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  
+  body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font);
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 600px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: var(--ink);
+  }
+  header p {
+    font-size: 14px;
+    color: var(--ink-dim);
+    margin: 0;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    margin-bottom: 24px;
+  }
+
+  .field-group {
+    margin-bottom: 20px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  
+  textarea, input[type="text"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 14px;
+    border-radius: 8px;
+    padding: 12px 14px;
+    outline: none;
+    transition: all 0.2s;
+    line-height: 1.5;
+  }
+  textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+  textarea:focus, input[type="text"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    font-family: var(--font);
+    font-weight: 600;
+    font-size: 15px;
+    border-radius: 8px;
+    border: none;
+    padding: 14px 24px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover {
+    background: var(--accent-hover);
+  }
+  .btn-primary:disabled {
+    background: #D1D5DB;
+    cursor: not-allowed;
+  }
+  
+  .btn-secondary {
+    background: var(--bg);
+    color: var(--ink);
+    border: 1px solid var(--border);
+    margin-top: 12px;
+  }
+  .btn-secondary:hover {
+    background: #F3F4F6;
+  }
+
+  .status {
+    font-size: 13px;
+    text-align: center;
+    margin-top: 16px;
+    color: var(--ink-dim);
+    display: none;
+  }
+
+  #resultCard {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .tags-display {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.6;
+    word-break: break-word;
+    min-height: 80px;
+  }
+
+  .error-text {
+    color: var(--accent);
+    text-align: center;
+    font-size: 14px;
+    margin-top: 12px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>YouTube Etiket Oluşturucu</h1>
+    <p>Videonuzun konusunu girin, SEO uyumlu etiketleri saniyeler içinde kopyalayın.</p>
+  </header>
+
+  <div class="card" id="inputCard">
+    <div class="field-group">
+      <label for="videoTopic">Videonuz ne hakkında?</label>
+      <textarea id="videoTopic" placeholder="Örn: Yeni başlayanlar için Shopify ile dropshipping rehberi, ürün bulma ve mağaza kurulumu..."></textarea>
+    </div>
+    
+    <div class="field-group">
+      <label for="videoLang">Etiket Dili</label>
+      <select id="videoLang" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-family: var(--font);">
+        <option value="Türkçe">Türkçe</option>
+        <option value="İngilizce">İngilizce</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary" id="generateBtn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+      Etiketleri Oluştur
+    </button>
+    <div id="loadingStatus" class="status">Yapay zeka etiketleri hazırlıyor, lütfen bekleyin...</div>
+    <div id="errorStatus" class="error-text"></div>
+  </div>
+
+  <div class="card" id="resultCard">
+    <label>Oluşturulan Etiketler</label>
+    <div class="tags-display" id="tagsOutput"></div>
+    
+    <button class="btn btn-primary" id="copyBtn" style="margin-top: 16px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Tümünü Kopyala
+    </button>
+    
+    <button class="btn btn-secondary" id="resetBtn">Yeni Video İçin Oluştur</button>
+  </div>
+</div>
+
+<script>
+  const WORKER_URL = "https://frosty-glade-23c2.omer-963.workers.dev";
+
+  const generateBtn = document.getElementById('generateBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const videoTopic = document.getElementById('videoTopic');
+  const videoLang = document.getElementById('videoLang');
+  const tagsOutput = document.getElementById('tagsOutput');
+  const inputCard = document.getElementById('inputCard');
+  const resultCard = document.getElementById('resultCard');
+  const loadingStatus = document.getElementById('loadingStatus');
+  const errorStatus = document.getElementById('errorStatus');
+
+  generateBtn.addEventListener('click', async () => {
+    const topic = videoTopic.value.trim();
+    if (!topic) {
+      showError("Lütfen videonuzun konusunu veya başlığını girin.");
+      return;
+    }
+
+    setLoading(true);
+    showError("");
+
+    const prompt = `Sen uzman bir YouTube SEO danışmanısın. Kullanıcının verdiği video konusuna göre, YouTube algoritmasında öne çıkacak arama hacmi yüksek etiketler (tags) üret. 
+    Video Konusu: "${topic}"
+    Dil: ${videoLang.value}
+    
+    KURAL: SADECE virgülle ayrılmış kelimeler/kelime öbekleri ver. Başka hiçbir açıklama, liste işareti, nokta veya markdown (örneğin \`\`\` vb.) KULLANMA. Doğrudan YouTube etiket kutusuna yapıştırılabilecek formatta olmalı. Ortalama 20-25 etiket üret.`;
+
+    try {
+      const response = await fetch(WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7 }
+        })
+      });
+
+      if (!response.ok) throw new Error("Sunucu ile iletişim kurulamadı.");
+      
+      const data = await response.json();
+      let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      
+      // Markdown ve gereksiz boşlukları temizle
+      text = text.replace(/```/g, "").trim();
+      
+      if (!text) throw new Error("Etiket üretilemedi, lütfen konuyu değiştirip tekrar deneyin.");
+
+      tagsOutput.textContent = text;
+      
+      inputCard.style.display = "none";
+      resultCard.style.display = "block";
+
+    } catch (err) {
+      showError(err.message || "Bir hata oluştu, lütfen tekrar deneyin.");
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(tagsOutput.textContent);
+      
+      // Buton görsel geribildirimi
+      const originalText = copyBtn.innerHTML;
+      copyBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Kopyalandı!`;
+      copyBtn.style.backgroundColor = "var(--success)";
+      
+      setTimeout(() => {
+        copyBtn.innerHTML = originalText;
+        copyBtn.style.backgroundColor = "var(--accent)";
+      }, 2000);
+    } catch (err) {
+      alert("Kopyalama başarısız oldu. Lütfen metni manuel olarak seçip kopyalayın.");
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    videoTopic.value = "";
+    resultCard.style.display = "none";
+    inputCard.style.display = "block";
+    videoTopic.focus();
+  });
+
+  function setLoading(isLoading) {
+    generateBtn.disabled = isLoading;
+    loadingStatus.style.display = isLoading ? "block" : "none";
+    if (isLoading) {
+      generateBtn.innerHTML = "Oluşturuluyor...";
+    } else {
+      generateBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg> Etiketleri Oluştur`;
+    }
+  }
+
+  function showError(msg) {
+    errorStatus.textContent = msg;
+    errorStatus.style.display = msg ? "block" : "none";
+  }
+
+  // Güvenlik İframe Kontrolü
+  (function() {
+      var iframeIçinde = (window.self !== window.top);
+      if (iframeIçinde) {
+          var referrer = document.referrer;
+          if (!referrer.includes("bilgisayartime.com")) {
+              document.body.innerHTML = "<h1 style='text-align:center; margin-top:20vh;'>Erişim Engellendi: Bu sayfa sadece Bilgisayar Time üzerinden görüntülenebilir.</h1>";
+          }
+      } else {
+          document.body.innerHTML = "<h1 style='text-align:center; margin-top:20vh;'>Erişim Engellendi: Bu sayfaya direkt erişemezsiniz.</h1>";
+      }
+  })();
+</script>
+</body>
+</html>
